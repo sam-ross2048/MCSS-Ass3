@@ -9,7 +9,7 @@ public enum Color {
 		this.albedo = albedo; 
 		}
 	
-	private double albedo() { return albedo; }
+	public double albedo() { return albedo; }
 	
 
 }

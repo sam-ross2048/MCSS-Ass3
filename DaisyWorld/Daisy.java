@@ -1,7 +1,6 @@
 
 public class Daisy extends Organism{
 
-	public double albedo;
 	public Color color;
 	
 	public Daisy(Color color) {

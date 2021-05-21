@@ -12,6 +12,17 @@ public class Earth {
 	
 	public Earth(int seed) {
 		this.earth = new Patch[Params.surface_x][Params.surface_y];
+		int i = 0;
+		int j = 0;
+		//Initialises all the patches on Earth
+		while (i < Params.surface_x) {
+			while (j < Params.surface_y) {
+				this.earth[i][j] = new Patch();
+				j++;
+			}
+			i++;
+			j=0;
+		}
 		this.random = new Random(seed);
 		Earth.num_whites = 0;
 		Earth.num_blacks = 0;
@@ -21,6 +32,7 @@ public class Earth {
 		this.earth = new Patch[Params.surface_x][Params.surface_y];
 		int i = 0;
 		int j = 0;
+		//Initialises all the patches on Earth
 		while (i < Params.surface_x) {
 			while (j < Params.surface_y) {
 				this.earth[i][j] = new Patch();
