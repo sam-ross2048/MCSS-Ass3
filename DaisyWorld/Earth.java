@@ -34,22 +34,28 @@ public class Earth {
 		Earth.num_blacks = 0;
 	}
 	
-	
+	/*
+	 * This will add Black and White daisies to the Earth until greater than the percent
+	 * specified in the Params file. This currently will not work if the number of total
+	 * patches is odd and each is allocated at 50%. Right now this should only be run
+	 * when the Earth is originally empty.
+	*/
 	public void seed_randomly() {
 		int number_of_patches = Params.surface_x * Params.surface_y;
 		List<Integer> range = IntStream.rangeClosed(0, number_of_patches-1)
-			    .boxed().collect(Collectors.toList());
-		while ((((double) Earth.num_whites/ (double) number_of_patches)*100) < Params.percent_white) {
-			int rand_int = random.nextInt(range.size());
-			int rand_patch = range.get(rand_int);
-			range.remove(rand_int);
-			int x_pos = rand_patch / Params.surface_x;
-			int y_pos = rand_patch % Params.surface_y;
-			this.earth[x_pos][y_pos].organism = new Daisy(Color.WHITE);
+			    .boxed().collect(Collectors.toList()); //Generate a 1D matrix of all patches
+		while ((( (double) Earth.num_whites / (double) number_of_patches)*100) 
+				< Params.percent_white) { //While the number of whites on Earth is less than the initial percent
+			int rand_int = random.nextInt(range.size()); //Choose a random value
+			int rand_patch = range.get(rand_int); //Get the patch that corresponds with that value
+			range.remove(rand_int); //Remove it so we cannot select it again
+			int x_pos = rand_patch / Params.surface_x; //X Position of Daisy
+			int y_pos = rand_patch % Params.surface_y; //Y Position of Daisy
+			this.earth[x_pos][y_pos].organism = new Daisy(Color.WHITE); //Add a White daisy
 			Earth.num_whites++;
 		}
 		while ((((double) Earth.num_blacks/ (double) number_of_patches)*100) < Params.percent_black) {
-			int rand_int = random.nextInt(range.size());
+			int rand_int = random.nextInt(range.size()); //Repeat the same steps for black flowers
 			int rand_patch = range.get(rand_int);
 			range.remove(rand_int);
 			int x_pos = rand_patch / Params.surface_x;
@@ -71,14 +77,7 @@ public class Earth {
 					res.append(".");
 				}
 				else {
-					if (this.earth[i][j].organism instanceof Daisy) {
-						if (((Daisy) this.earth[i][j].organism).color == Color.WHITE) {
-							res.append("W");
-						}
-						else if (((Daisy) this.earth[i][j].organism).color == Color.BLACK) {
-							res.append("B");
-						}
-					}
+					res.append(this.earth[i][j].organism.toString());
 				}
 				res.append("]");
 				j++;

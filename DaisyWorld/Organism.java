@@ -10,6 +10,13 @@ public abstract class Organism {
 	public void grow() {
 		this.age += 1;
 	}
+	
+	
 	public abstract void reproduce();
 	public abstract boolean die();
+	
+	public String toString() {
+		return "O";
+	}
 }
+	
