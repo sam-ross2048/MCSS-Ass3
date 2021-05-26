@@ -1,3 +1,5 @@
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -5,12 +7,199 @@ import java.util.stream.IntStream;
 
 public class Earth {
 
-	public Patch[][] earth;
-	public Random random;
-	public static int num_whites;
-	public static int num_blacks;
+	private final double DIFFUSION_RATE = 0.5;
+	private Patch[][] earth = new Patch[Params.surface_x][Params.surface_y];
+	private Random random = new Random();
+	private int numWhites;
+	private int numBlacks;
+	private int ticks;
+	private static int MAX_AGE = Params.max_age;
+	private double globalTemp = 0;
+
+	private double startPercentWhite;
+	private double startPercentBlack;
+	private double albedoWhite;
+	private double albedoBlack;
+	private double solarLuminosity;
+	private double albedoSurface;
+	private int maxTicks;
+	private String scenario;
 	
-	public Earth(int seed) {
+
+
+	public Earth(double startPercentWhite, double startPercentBlack, double albedoWhite, double albedoBlack,
+				 double solarLuminosity, double albedoSurface, int maxTicks, String scenario) {
+		this.startPercentWhite = startPercentWhite;
+		this.startPercentBlack = startPercentBlack;
+		this.numWhites = (int) Math.floor(Params.surface_x * Params.surface_y * startPercentWhite);
+		System.out.println(numWhites);
+		this.numBlacks = (int) Math.floor(Params.surface_x * Params.surface_y * startPercentBlack);
+		this.albedoWhite = albedoWhite;
+		this.albedoBlack = albedoBlack;
+		this.solarLuminosity = solarLuminosity;
+		this.albedoSurface = albedoSurface;
+		this.maxTicks = maxTicks;
+		this.scenario = scenario;
+
+		this.init();
+	}
+
+	public void init() {
+
+		for(int i=0; i < Params.surface_x; i++) {
+			for (int j = 0; j < Params.surface_y; j++) {
+				earth[i][j] = new Patch();
+			}
+		}
+		seed_randomly(numWhites, numBlacks);
+
+		switch (scenario) {
+			case Params.RAMP -> solarLuminosity = 0.8;
+			case Params.LOW -> solarLuminosity = 0.6;
+			case Params.OUR -> solarLuminosity = 1.0;
+			case Params.HIGH -> solarLuminosity = 1.4;
+			default -> {
+			}
+		}
+
+		updatePatchTemp();
+		calcGlobalTemp();
+	}
+
+
+	public void run() {
+		while(ticks < maxTicks) {
+			updatePatchTemp();
+			diffuse();
+			checkSurvivability();
+			calcGlobalTemp();
+			ticks++;
+
+			if (scenario.equals(Params.RAMP)) {
+				if (ticks > 200 && ticks <= 400) {
+					solarLuminosity = new BigDecimal(solarLuminosity + 0.005).setScale(4, RoundingMode.HALF_UP).doubleValue() ;
+				} else if (ticks > 600 && ticks <= 850) {
+					solarLuminosity = new BigDecimal(solarLuminosity - 0.0025).setScale(4, RoundingMode.HALF_UP).doubleValue();
+				}
+			}
+		}
+	}
+
+	private void checkSurvivability() {
+		for (int i=0; i < Params.surface_x; i++) {
+			for (int j = 0; j < Params.surface_y; j++) {
+				earth[i][j].checkSurvivability(findNeighbours(i,j));
+			}
+		}
+	}
+
+	private void diffuse() {
+
+		for (int i=0; i < Params.surface_x; i++) {
+			for (int j = 0; j < Params.surface_y; j++) {
+				earth[i][j].setTemporaryTemp(0);
+			}
+		}
+
+		for (int i=0; i < Params.surface_x; i++) {
+			for (int j=0; j < Params.surface_y; j++) {
+				Patch[] neighbours = findNeighbours(i, j);
+				double diffusionTemp = earth[i][j].getTemperature() * DIFFUSION_RATE;
+				earth[i][j].setTemperature(earth[i][j].getTemperature() - diffusionTemp);
+
+				for (Patch neighbour : neighbours) {
+					neighbour.setTemporaryTemp(neighbour.getTemporaryTemp() + diffusionTemp*0.125);
+				}
+			}
+		}
+
+		for (int i=0; i < Params.surface_x; i++) {
+			for (int j = 0; j < Params.surface_y; j++) {
+				earth[i][j].setTemperature(earth[i][j].getTemperature() + earth[i][j].getTemporaryTemp());
+			}
+		}
+	}
+
+	private Patch[] findNeighbours(int x, int y) {
+		Patch[] neighbours = new Patch [8];
+
+		int leftX = (x - 1 + Params.surface_x) % Params.surface_x;
+		int rightX = (x + 1) % Params.surface_x;
+		int aboveY = (y - 1 + Params.surface_y) % Params.surface_y;
+		int belowY = (y + 1) % Params.surface_y;
+
+		neighbours[0] = earth[leftX][y];
+		neighbours[1] = earth[leftX][aboveY];
+		neighbours[2] = earth[leftX][belowY];
+		neighbours[3] = earth[x][aboveY];
+		neighbours[4] = earth[x][belowY];
+		neighbours[5] = earth[rightX][aboveY];
+		neighbours[6] = earth[rightX][y];
+		neighbours[7] = earth[rightX][belowY];
+
+		return neighbours;
+	}
+
+	/*
+	 * This will add Black and White daisies to the Earth until greater than the percent
+	 * specified in the Params file. This currently will not work if the number of total
+	 * patches is odd and each is allocated at 50%. Right now this should only be run
+	 * when the Earth is originally empty.
+	*/
+	private void seed_randomly(int numWhites, int numBlacks) {
+		int x,y;
+		int counter = 0;
+		for (int i=0; i < numWhites; i++) {
+			x = random.nextInt(Params.surface_x);
+			y = random.nextInt(Params.surface_y);
+			if (earth[x][y].getDaisy() == null) {
+				System.out.println("Placing white");
+				placeWhite(x, y);
+			} else {
+				i--;
+			}
+		}
+		for (int i=0; i < numBlacks; i++) {
+			x = random.nextInt(Params.surface_x);
+			y = random.nextInt(Params.surface_y);
+			if (earth[x][y].getDaisy() == null) {
+				System.out.println("Placing black");
+				placeBlack(x, y);
+			} else {
+				i--;
+			}
+		}
+	}
+
+	private void placeWhite(int x, int y) {
+
+		WhiteDaisy daisy = new WhiteDaisy(albedoWhite, random.nextInt(MAX_AGE));
+		earth[x][y].setDaisy(daisy);
+	}
+
+	private void placeBlack(int x, int y) {
+		BlackDaisy daisy = new BlackDaisy(albedoBlack, random.nextInt(MAX_AGE));
+		earth[x][y].setDaisy(daisy);
+	}
+
+	private void updatePatchTemp() {
+		for(int i=0;i < Params.surface_x; i++) {
+			for(int j=0; j < Params.surface_y; j++) {
+				earth[i][j].calc_temperature(solarLuminosity);
+			}
+		}
+	}
+
+	private void calcGlobalTemp() {
+		double total = 0;
+		for(int i=0;i < Params.surface_x; i++) {
+			for (int j = 0; j < Params.surface_y; j++) {
+				total += earth[i][j].getTemperature();
+			}
+		}
+	}
+
+	/*public Earth(int seed) {
 		this.earth = new Patch[Params.surface_x][Params.surface_y];
 		int i = 0;
 		int j = 0;
@@ -27,7 +216,7 @@ public class Earth {
 		Earth.num_whites = 0;
 		Earth.num_blacks = 0;
 	}
-	
+
 	public Earth() {
 		this.earth = new Patch[Params.surface_x][Params.surface_y];
 		int i = 0;
@@ -44,38 +233,7 @@ public class Earth {
 		this.random = new Random();
 		Earth.num_whites = 0;
 		Earth.num_blacks = 0;
-	}
-	
-	/*
-	 * This will add Black and White daisies to the Earth until greater than the percent
-	 * specified in the Params file. This currently will not work if the number of total
-	 * patches is odd and each is allocated at 50%. Right now this should only be run
-	 * when the Earth is originally empty.
-	*/
-	public void seed_randomly() {
-		int number_of_patches = Params.surface_x * Params.surface_y;
-		List<Integer> range = IntStream.rangeClosed(0, number_of_patches-1)
-			    .boxed().collect(Collectors.toList()); //Generate a 1D matrix of all patches
-		while ((( (double) Earth.num_whites / (double) number_of_patches)*100) 
-				< Params.percent_white) { //While the number of whites on Earth is less than the initial percent
-			int rand_int = random.nextInt(range.size()); //Choose a random value
-			int rand_patch = range.get(rand_int); //Get the patch that corresponds with that value
-			range.remove(rand_int); //Remove it so we cannot select it again
-			int x_pos = rand_patch / Params.surface_x; //X Position of Daisy
-			int y_pos = rand_patch % Params.surface_y; //Y Position of Daisy
-			this.earth[x_pos][y_pos].organism = new Daisy(Color.WHITE); //Add a White daisy
-			Earth.num_whites++;
-		}
-		while ((((double) Earth.num_blacks/ (double) number_of_patches)*100) < Params.percent_black) {
-			int rand_int = random.nextInt(range.size()); //Repeat the same steps for black flowers
-			int rand_patch = range.get(rand_int);
-			range.remove(rand_int);
-			int x_pos = rand_patch / Params.surface_x;
-			int y_pos = rand_patch % Params.surface_y;
-			this.earth[x_pos][y_pos].organism = new Daisy(Color.BLACK);
-			Earth.num_blacks++;
-		}
-	}
+	}*/
 	
 	public String toString() {
 		StringBuilder res = new StringBuilder();
@@ -85,11 +243,11 @@ public class Earth {
 		while (i < Params.surface_x) {
 			while (j < Params.surface_y) {
 				res.append("[");
-				if (this.earth[i][j].organism == null) {
+				if (this.earth[i][j].getDaisy() == null) {
 					res.append(".");
 				}
 				else {
-					res.append(this.earth[i][j].organism.toString());
+					res.append(this.earth[i][j].getDaisy().toString());
 				}
 				res.append("]");
 				j++;
@@ -101,9 +259,9 @@ public class Earth {
 		return res.toString();
 	}
 	
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		Earth earth = new Earth();
 		earth.seed_randomly();
 		System.out.println(earth.toString());
-	}
+	}*/
 }

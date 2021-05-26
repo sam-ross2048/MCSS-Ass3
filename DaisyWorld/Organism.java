@@ -3,8 +3,8 @@ public abstract class Organism {
 	
 	public int age;
 	
-	public Organism() {
-		this.age = 0;
+	public Organism(int age) {
+		this.age = age;
 	}
 
 	public void grow() {
@@ -17,6 +17,14 @@ public abstract class Organism {
 	
 	public String toString() {
 		return "O";
+	}
+
+	public int getAge() {
+		return age;
+	}
+
+	public void incrementAge() {
+		age += 1;
 	}
 }
 	
