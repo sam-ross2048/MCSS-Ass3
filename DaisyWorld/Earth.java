@@ -1,5 +1,10 @@
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.Buffer;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -7,48 +12,41 @@ import java.util.stream.IntStream;
 
 public class Earth {
 
-	private final double DIFFUSION_RATE = 0.5;
-	private Patch[][] earth = new Patch[Params.surface_x][Params.surface_y];
-	private Random random = new Random();
+	private final Patch[][] earth = new Patch[Params.surface_x][Params.surface_y];
+	private final Random random = new Random();
 	private int numWhites;
 	private int numBlacks;
 	private int ticks;
-	private static int MAX_AGE = Params.max_age;
+	private static final int MAX_AGE = Params.max_age;
 	private double globalTemp = 0;
-
-	private double startPercentWhite;
-	private double startPercentBlack;
-	private double albedoWhite;
-	private double albedoBlack;
+	private final double albedoWhite;
+	private final double albedoBlack;
 	private double solarLuminosity;
-	private double albedoSurface;
-	private int maxTicks;
-	private String scenario;
+	private final int maxTicks;
+	private final String scenario;
+	private File outputCSV;
+	private BufferedWriter outputBW;
 	
 
 
 	public Earth(double startPercentWhite, double startPercentBlack, double albedoWhite, double albedoBlack,
 				 double solarLuminosity, double albedoSurface, int maxTicks, String scenario) {
-		this.startPercentWhite = startPercentWhite;
-		this.startPercentBlack = startPercentBlack;
 		this.numWhites = (int) Math.floor(Params.surface_x * Params.surface_y * startPercentWhite);
-		System.out.println(numWhites);
 		this.numBlacks = (int) Math.floor(Params.surface_x * Params.surface_y * startPercentBlack);
 		this.albedoWhite = albedoWhite;
 		this.albedoBlack = albedoBlack;
 		this.solarLuminosity = solarLuminosity;
-		this.albedoSurface = albedoSurface;
 		this.maxTicks = maxTicks;
 		this.scenario = scenario;
 
-		this.init();
+		this.init(albedoSurface);
 	}
 
-	public void init() {
+	public void init(double albedoSurface) {
 
 		for(int i=0; i < Params.surface_x; i++) {
 			for (int j = 0; j < Params.surface_y; j++) {
-				earth[i][j] = new Patch();
+				earth[i][j] = new Patch(albedoSurface);
 			}
 		}
 		seed_randomly(numWhites, numBlacks);
@@ -64,11 +62,13 @@ public class Earth {
 
 		updatePatchTemp();
 		calcGlobalTemp();
+		setupCSV();
 	}
 
 
 	public void run() {
 		while(ticks < maxTicks) {
+			countDaisies();
 			updatePatchTemp();
 			diffuse();
 			checkSurvivability();
@@ -82,6 +82,7 @@ public class Earth {
 					solarLuminosity = new BigDecimal(solarLuminosity - 0.0025).setScale(4, RoundingMode.HALF_UP).doubleValue();
 				}
 			}
+			writeCSV();
 		}
 	}
 
@@ -104,6 +105,7 @@ public class Earth {
 		for (int i=0; i < Params.surface_x; i++) {
 			for (int j=0; j < Params.surface_y; j++) {
 				Patch[] neighbours = findNeighbours(i, j);
+				double DIFFUSION_RATE = 0.5;
 				double diffusionTemp = earth[i][j].getTemperature() * DIFFUSION_RATE;
 				earth[i][j].setTemperature(earth[i][j].getTemperature() - diffusionTemp);
 
@@ -148,12 +150,10 @@ public class Earth {
 	*/
 	private void seed_randomly(int numWhites, int numBlacks) {
 		int x,y;
-		int counter = 0;
 		for (int i=0; i < numWhites; i++) {
 			x = random.nextInt(Params.surface_x);
 			y = random.nextInt(Params.surface_y);
 			if (earth[x][y].getDaisy() == null) {
-				System.out.println("Placing white");
 				placeWhite(x, y);
 			} else {
 				i--;
@@ -163,7 +163,6 @@ public class Earth {
 			x = random.nextInt(Params.surface_x);
 			y = random.nextInt(Params.surface_y);
 			if (earth[x][y].getDaisy() == null) {
-				System.out.println("Placing black");
 				placeBlack(x, y);
 			} else {
 				i--;
@@ -172,7 +171,6 @@ public class Earth {
 	}
 
 	private void placeWhite(int x, int y) {
-
 		WhiteDaisy daisy = new WhiteDaisy(albedoWhite, random.nextInt(MAX_AGE));
 		earth[x][y].setDaisy(daisy);
 	}
@@ -197,43 +195,52 @@ public class Earth {
 				total += earth[i][j].getTemperature();
 			}
 		}
+		this.globalTemp = total / (Params.surface_x * Params.surface_y);
 	}
 
-	/*public Earth(int seed) {
-		this.earth = new Patch[Params.surface_x][Params.surface_y];
-		int i = 0;
-		int j = 0;
-		//Initialises all the patches on Earth
-		while (i < Params.surface_x) {
-			while (j < Params.surface_y) {
-				this.earth[i][j] = new Patch();
-				j++;
+	private void countDaisies() {
+		int white = 0, black = 0;
+
+		for(int i=0;i < Params.surface_x; i++) {
+			for (int j=0;j < Params.surface_y; j++) {
+				if (earth[i][j].getDaisy() != null) {
+					if(earth[i][j].getDaisy() instanceof WhiteDaisy) {
+						white++;
+					} else if (earth[i][j].getDaisy() instanceof BlackDaisy){
+						black++;
+					}
+				}
 			}
-			i++;
-			j=0;
 		}
-		this.random = new Random(seed);
-		Earth.num_whites = 0;
-		Earth.num_blacks = 0;
+		this.numWhites = white;
+		this.numBlacks = black;
 	}
 
-	public Earth() {
-		this.earth = new Patch[Params.surface_x][Params.surface_y];
-		int i = 0;
-		int j = 0;
-		//Initialises all the patches on Earth
-		while (i < Params.surface_x) {
-			while (j < Params.surface_y) {
-				this.earth[i][j] = new Patch();
-				j++;
-			}
-			i++;
-			j=0;
+	private void setupCSV() {
+		outputCSV = new File("output.csv");
+
+		try {
+			outputBW = new BufferedWriter(new FileWriter(outputCSV, false));
+
+			outputBW.write("ticks,numWhites,numBlacks,globalTemp,solarLuminosity");
+			outputBW.newLine();
+			outputBW.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		this.random = new Random();
-		Earth.num_whites = 0;
-		Earth.num_blacks = 0;
-	}*/
+	}
+
+	private void writeCSV() {
+		try {
+			outputBW = new BufferedWriter(new FileWriter(outputCSV, true));
+
+			outputBW.write(ticks+","+numWhites+","+numBlacks+","+globalTemp+","+solarLuminosity);
+			outputBW.newLine();
+			outputBW.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public String toString() {
 		StringBuilder res = new StringBuilder();
@@ -258,10 +265,4 @@ public class Earth {
 		}
 		return res.toString();
 	}
-	
-	/*public static void main(String[] args) {
-		Earth earth = new Earth();
-		earth.seed_randomly();
-		System.out.println(earth.toString());
-	}*/
 }

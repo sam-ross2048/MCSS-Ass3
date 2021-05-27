@@ -6,12 +6,12 @@ public class Patch {
 	private Organism organism;
 	private double temperature;
 	private double temporaryTemp;
-	private double albedo;
+	private final double albedo;
 
 	private Daisy daisy = null;
 
-	public Patch() {
-		this.albedo = Params.albedo_surface;
+	public Patch(double albedo) {
+		this.albedo = albedo;
 		this.organism = null;
 	}
 	
@@ -49,7 +49,7 @@ public class Patch {
 		Random r = new Random();
 		this.daisy.incrementAge();
 
-		if (this.daisy.getAge() >= daisy.MAX_AGE) {
+		if (this.daisy.getAge() >= this.daisy.MAX_AGE) {
 			this.daisy = null;
 			return;
 		}
@@ -66,7 +66,7 @@ public class Patch {
 		ArrayList<Patch> daisylessNeighbours = new ArrayList<Patch>();
 
 		for (Patch neighbour : neighbours) {
-			if(neighbour.getDaisy() != null) {
+			if(neighbour.getDaisy() == null) {
 				daisylessNeighbours.add(neighbour);
 			}
 		}
