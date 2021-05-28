@@ -1,4 +1,7 @@
-
+/**
+ * The Organism class is an abstract class that represents
+ * a living entity.
+ */
 public abstract class Organism {
 	
 	public int age;

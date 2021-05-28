@@ -1,3 +1,11 @@
+/**
+ * The Patch class represents a patch on earth.
+ * This patch can be empty, or it can have either
+ * a black or white daisy on it.
+ * Each patch has a temperature and an albedo.
+ * The temporary temparture is used when diffusing
+ * heat among patches.
+ */
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,11 +21,11 @@ public class Patch {
 		this.albedo = albedo;
 	}
 	
-	
-	/*
+	/**
 	 * Identical to calc-temperature method in NetLogo.
 	 * Currently assumes that daisies are the only organisms
 	 * other than the surface with albedoes.
+	 * @param solar_luminosity
 	 */
 	public void calc_temperature(double solar_luminosity) {
 		double absorbed_luminosity;
@@ -38,6 +46,13 @@ public class Patch {
 		this.temperature = (this.temperature + local_heating) / 2;
 	}
 
+	/**
+	 * This method increases the daisys' age by 1.
+	 * If a daisy reaches its maximum age, then the daisy dies.
+	 * Moreover, every daisy has a chance of producing a seed (another daisy)
+	 * in one of its empty neighbouring patches.
+	 * @param neighbours
+	 */
 	public void checkSurvivability(Patch[] neighbours) {
 		if (this.daisy == null) {
 			return;
@@ -59,6 +74,11 @@ public class Patch {
 
 	}
 
+	/**
+	 * This method first gets a list of all empty neighbouring patches.
+	 * It then chooses a random patch of these empty patches to plant the seed.
+	 * @param neighbours
+	 */
 	private void findDaisylessNeighbour(Patch[] neighbours) {
 		ArrayList<Patch> daisylessNeighbours = new ArrayList<>();
 

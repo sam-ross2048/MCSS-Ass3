@@ -1,5 +1,10 @@
-
-
+/**
+ * This is the main class where the simulation occurs.
+ * To run the program, run: javac Sim.java
+ * Then run: java Sim with the appropriate command line arguments.
+ * Example:  
+ * java Sim 0.25 0.25 0.75 0.25 0.8 0.4 100 our 40
+ */
 public class Sim {
 
 	public static void main(String [] args) {
@@ -36,10 +41,11 @@ public class Sim {
 				scenario, numHerbivores);
 
 		earth.run();
-
+		
+		System.out.println("Final State:");
+		System.out.println("-----------------------");
 		System.out.println(earth.toString());
 
 	}
 
-	//Earth earth = new Earth(5000);
 }

@@ -1,4 +1,6 @@
-
+/**
+ * An abstract class that represents all types of daises
+ */
 public abstract class Daisy extends Organism{
 
 	private final double albedo;
