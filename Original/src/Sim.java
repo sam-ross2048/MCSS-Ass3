@@ -25,6 +25,8 @@ public class Sim {
 			default: scenario = Params.CURRENT;
 		};
 
+		System.out.println(scenario);
+
 		if (startPercentWhite + startPercentBlack > 1) {
 			System.out.println("Invalid Input. Please ensure that the daisy percentages do not exceed 100%");
 			return;
