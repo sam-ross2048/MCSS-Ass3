@@ -23,8 +23,8 @@ public class Patch {
 	 * other than the surface with albedoes.
 	 */
 	public void calc_temperature(double solar_luminosity) {
-		double absorbed_luminosity = 0;
-		double local_heating = 0;
+		double absorbed_luminosity;
+		double local_heating;
 
 		if (this.daisy == null) {
 			absorbed_luminosity = ((1 - this.albedo) * solar_luminosity);
@@ -45,9 +45,9 @@ public class Patch {
 		if (this.daisy == null) {
 			return;
 		}
-		double seedThreshold = 0;
+		double seedThreshold;
 		Random r = new Random();
-		this.daisy.incrementAge();
+		this.daisy.grow();
 
 		if (this.daisy.getAge() >= this.daisy.MAX_AGE) {
 			this.daisy = null;
@@ -63,7 +63,7 @@ public class Patch {
 	}
 
 	private void findDaisylessNeighbour(Patch[] neighbours) {
-		ArrayList<Patch> daisylessNeighbours = new ArrayList<Patch>();
+		ArrayList<Patch> daisylessNeighbours = new ArrayList<>();
 
 		for (Patch neighbour : neighbours) {
 			if(neighbour.getDaisy() == null && neighbour.getHerbivore() == null) {
@@ -89,14 +89,10 @@ public class Patch {
 			return;
 		}
 
-		this.herbivore.incrementAge();
+		this.herbivore.grow();
 		this.herbivore.incrementHunger();
 
 		if (this.herbivore.getAge() >= Params.max_age || this.herbivore.getHunger() >= Params.HERBIVORE_STARVE_TIME) {
-			if(this.herbivore.getHunger() >= Params.HERBIVORE_STARVE_TIME) {
-				// HERBIVORES ARE NEVER STARVING...
-				//System.out.println("HERBIVORE STARVED");
-			}
 			this.herbivore = null;
 			return;
 		}

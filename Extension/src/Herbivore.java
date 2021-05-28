@@ -7,16 +7,6 @@ public class Herbivore extends Organism {
         this.hunger = hunger;
     }
 
-    @Override
-    public void reproduce() {
-
-    }
-
-    @Override
-    public boolean die() {
-        return false;
-    }
-
     public int getHunger() {
         return this.hunger;
     }

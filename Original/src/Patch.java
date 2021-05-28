@@ -3,7 +3,6 @@ import java.util.Random;
 
 public class Patch {
 
-	private Organism organism;
 	private double temperature;
 	private double temporaryTemp;
 	private final double albedo;
@@ -12,7 +11,6 @@ public class Patch {
 
 	public Patch(double albedo) {
 		this.albedo = albedo;
-		this.organism = null;
 	}
 	
 	
@@ -21,10 +19,9 @@ public class Patch {
 	 * Currently assumes that daisies are the only organisms
 	 * other than the surface with albedoes.
 	 */
-	
 	public void calc_temperature(double solar_luminosity) {
-		double absorbed_luminosity = 0;
-		double local_heating = 0;
+		double absorbed_luminosity;
+		double local_heating;
 
 		if (this.daisy == null) {
 			absorbed_luminosity = ((1 - this.albedo) * solar_luminosity);
@@ -45,9 +42,9 @@ public class Patch {
 		if (this.daisy == null) {
 			return;
 		}
-		double seedThreshold = 0;
+		double seedThreshold;
 		Random r = new Random();
-		this.daisy.incrementAge();
+		this.daisy.grow();
 
 		if (this.daisy.getAge() >= this.daisy.MAX_AGE) {
 			this.daisy = null;
@@ -63,7 +60,7 @@ public class Patch {
 	}
 
 	private void findDaisylessNeighbour(Patch[] neighbours) {
-		ArrayList<Patch> daisylessNeighbours = new ArrayList<Patch>();
+		ArrayList<Patch> daisylessNeighbours = new ArrayList<>();
 
 		for (Patch neighbour : neighbours) {
 			if(neighbour.getDaisy() == null) {
@@ -107,7 +104,4 @@ public class Patch {
 	public void setTemporaryTemp(double temporaryTemp) {
 		this.temporaryTemp = temporaryTemp;
 	}
-
-
-
 }
