@@ -1,3 +1,6 @@
+/**
+ * A class that represents black daises
+ */
 public class BlackDaisy extends Daisy {
 
     public BlackDaisy(double albedo, int age) {

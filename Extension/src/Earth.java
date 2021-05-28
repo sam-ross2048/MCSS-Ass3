@@ -1,3 +1,6 @@
+/**
+ * This class represents the earth as a grid (2D array) of patches.
+ */
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -40,6 +43,16 @@ public class Earth {
 		this.init(albedoSurface);
 	}
 
+	/**
+	 * This method initalizes earth in regards to the value
+	 * of the albedo surface of the patches and the solar
+	 * luminosity.
+	 * Moreover, the white and black daises and the herbivores
+	 * are distributed randomly across the patches.
+	 * The temperature of every patch is then updated along
+	 * with the global temperature.
+	 * @param albedoSurface
+	 */
 	public void init(double albedoSurface) {
 
 		for(int i=0; i < Params.surface_x; i++) {
@@ -65,10 +78,15 @@ public class Earth {
 		updatePatchTemp();
 		calcGlobalTemp();
 		setupCSV();
+		System.out.println("Initial Sate:");
+		System.out.println("-----------------------");
 		System.out.println(toString());
 	}
 
-
+	/**
+	 * This method runs the system together
+	 * performing the necessary checks and updates.
+	 */
 	public void run() {
 		while(ticks < maxTicks) {
 			countOrganisms();
@@ -90,6 +108,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * This methods updates the herbivores.
+	 */
 	private void updateHerbivores() {
 		for(int i=0;i < Params.surface_x; i++) {
 			for(int j=0;j < Params.surface_y; j++) {
@@ -98,6 +119,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * This checks the surviability for all patches.
+	 */
 	private void checkSurvivability() {
 		for (int i=0; i < Params.surface_x; i++) {
 			for (int j = 0; j < Params.surface_y; j++) {
@@ -106,6 +130,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * This method properly distributes heat among the patches.
+	 */
 	private void diffuse() {
 
 		for (int i=0; i < Params.surface_x; i++) {
@@ -134,6 +161,13 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * This method returns all the neighbours for a given patch.
+	 * The patch is specified using the x and y coordinates.
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	private Patch[] findNeighbours(int x, int y) {
 		Patch[] neighbours = new Patch [8];
 
@@ -156,8 +190,8 @@ public class Earth {
 
 	/*
 	 * This will add Black and White daisies to the Earth until greater than the percent
-	 * specified in the Params file. This currently will not work if the number of total
-	 * patches is odd and each is allocated at 50%. Right now this should only be run
+	 * specified in the Params file. This will not work if the number of total
+	 * patches is odd and each is allocated at 50%. This should only be run
 	 * when the Earth is originally empty.
 	*/
 	private void seed_randomly(int numWhites, int numBlacks, int numHerbivores) {
@@ -191,21 +225,39 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * Places a white daisy at the specified coordinates.
+	 * @param x
+	 * @param y
+	 */
 	private void placeWhite(int x, int y) {
 		WhiteDaisy daisy = new WhiteDaisy(albedoWhite, random.nextInt(MAX_AGE));
 		earth[x][y].setDaisy(daisy);
 	}
 
+	/**
+	 * Places a black daisy at the specified coordinates.
+	 * @param x
+	 * @param y
+	 */
 	private void placeBlack(int x, int y) {
 		BlackDaisy daisy = new BlackDaisy(albedoBlack, random.nextInt(MAX_AGE));
 		earth[x][y].setDaisy(daisy);
 	}
 
+	/**
+	 * Places a herbivore at the specified coordinates.
+	 * @param x
+	 * @param y
+	 */
 	private void placeHerbivore(int x, int y) {
 		Herbivore herbivore = new Herbivore(random.nextInt(MAX_AGE), random.nextInt(Params.HERBIVORE_STARVE_TIME));
 		earth[x][y].setHerbivore(herbivore);
 	}
 
+	/**
+	 * Updates patch temperature
+	 */
 	private void updatePatchTemp() {
 		for(int i=0;i < Params.surface_x; i++) {
 			for(int j=0; j < Params.surface_y; j++) {
@@ -214,6 +266,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * Calculates the global temperature
+	 */
 	private void calcGlobalTemp() {
 		double total = 0;
 		for(int i=0;i < Params.surface_x; i++) {
@@ -224,6 +279,11 @@ public class Earth {
 		this.globalTemp = total / (Params.surface_x * Params.surface_y);
 	}
 
+	/**
+	 * Counts the number of ogransims.
+	 * In our case, it counts the number of herbivores
+	 * and the number of white and black daises.
+	 */
 	private void countOrganisms() {
 		int white = 0, black = 0, herbivores = 0;
 
@@ -246,6 +306,9 @@ public class Earth {
 		this.numHerbivores = herbivores;
 	}
 
+	/**
+	 * Creates a csv file called output.csv.
+	 */
 	private void setupCSV() {
 		outputCSV = new File("output.csv");
 
@@ -260,6 +323,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * Writes data on the output.csv file.
+	 */
 	private void writeCSV() {
 		try {
 			outputBW = new BufferedWriter(new FileWriter(outputCSV, true));
