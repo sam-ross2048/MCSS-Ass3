@@ -29,8 +29,8 @@ public class Herbivore extends Organism {
         this.hunger += 1;
     }
 
-    public void decrementHunger() {
-        this.hunger -= 1;
+    public void eatDaisy() {
+        this.hunger -= 25;
     }
 
     public String toString() {

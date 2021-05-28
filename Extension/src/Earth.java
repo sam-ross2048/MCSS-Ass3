@@ -51,9 +51,13 @@ public class Earth {
 
 		switch (scenario) {
 			case Params.RAMP: solarLuminosity = 0.8;
+				break;
 			case Params.LOW: solarLuminosity = 0.6;
+				break;
 			case Params.OUR: solarLuminosity = 1.0;
+				break;
 			case Params.HIGH: solarLuminosity = 1.4;
+				break;
 			default: {
 			}
 		}

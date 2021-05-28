@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public class Patch {
 
@@ -127,12 +128,15 @@ public class Patch {
 				// Seed new herbivore. Share hunger between parent and offspring (i.e. multiply hunger by 2)
 				seedingPlace.setHerbivore(new Herbivore(0, (this.herbivore.getHunger()*2)));
 				this.herbivore.setHunger(this.herbivore.getHunger()*2);
+				if (seedingPlace.getDaisy() != null) {
+					seedingPlace.getHerbivore().eatDaisy();
+				}
 				seedingPlace.setDaisy(null);
 			}
 		} else {
 			seedingPlace.setHerbivore(new Herbivore(this.herbivore.getAge(), this.herbivore.getHunger()));
 			if (seedingPlace.getDaisy() != null) {
-				seedingPlace.getHerbivore().decrementHunger();
+				seedingPlace.getHerbivore().eatDaisy();
 				seedingPlace.setDaisy(null);
 			}
 			this.herbivore = null;
