@@ -52,11 +52,11 @@ public class Earth {
 		seed_randomly(numWhites, numBlacks);
 
 		switch (scenario) {
-			case Params.RAMP -> solarLuminosity = 0.8;
-			case Params.LOW -> solarLuminosity = 0.6;
-			case Params.OUR -> solarLuminosity = 1.0;
-			case Params.HIGH -> solarLuminosity = 1.4;
-			default -> {
+			case Params.RAMP: solarLuminosity = 0.8;
+			case Params.LOW: solarLuminosity = 0.6;
+			case Params.OUR: solarLuminosity = 1.0;
+			case Params.HIGH: solarLuminosity = 1.4;
+			default: {
 			}
 		}
 

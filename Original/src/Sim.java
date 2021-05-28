@@ -11,12 +11,18 @@ public class Sim {
 		double albedoSurface = Double.parseDouble(args[5]);
 		int maxTicks = Integer.parseInt(args[6]);
 
-		String scenario = switch (args[7]) {
-			case "ramp" -> Params.RAMP;
-			case "low" -> Params.LOW;
-			case "our" -> Params.OUR;
-			case "high" -> Params.HIGH;
-			default -> Params.CURRENT;
+		String scenario;
+
+		switch (args[7]) {
+			case "ramp": scenario = Params.RAMP;
+			break;
+			case "low": scenario = Params.LOW;
+			break;
+			case "our": scenario = Params.OUR;
+			break;
+			case "high": scenario = Params.HIGH;
+			break;
+			default: scenario = Params.CURRENT;
 		};
 
 		if (startPercentWhite + startPercentBlack > 1) {
