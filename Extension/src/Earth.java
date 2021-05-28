@@ -12,7 +12,7 @@ public class Earth {
 	private final Random random = new Random();
 	private int numWhites;
 	private int numBlacks;
-	private int ticks;
+	private int ticks = 0;
 	private static final int MAX_AGE = Params.max_age;
 	private double globalTemp = 0;
 	private final double albedoWhite;
@@ -65,7 +65,7 @@ public class Earth {
 		updatePatchTemp();
 		calcGlobalTemp();
 		setupCSV();
-		System.out.println(toString());
+		System.out.println(this);
 	}
 
 
@@ -94,6 +94,12 @@ public class Earth {
 		for(int i=0;i < Params.surface_x; i++) {
 			for(int j=0;j < Params.surface_y; j++) {
 				earth[i][j].updateHerbivore(findNeighbours(i, j));
+			}
+		}
+
+		for(int i=0;i < Params.surface_x; i++) {
+			for (int j = 0; j < Params.surface_y; j++) {
+				earth[i][j].resetMoved();
 			}
 		}
 	}
@@ -202,7 +208,7 @@ public class Earth {
 	}
 
 	private void placeHerbivore(int x, int y) {
-		Herbivore herbivore = new Herbivore(random.nextInt(MAX_AGE), random.nextInt(Params.HERBIVORE_STARVE_TIME));
+		Herbivore herbivore = new Herbivore(0, random.nextInt(Params.HERBIVORE_STARVE_TIME));
 		earth[x][y].setHerbivore(herbivore);
 	}
 

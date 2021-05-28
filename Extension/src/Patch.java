@@ -85,7 +85,7 @@ public class Patch {
 	}
 
 	public void updateHerbivore(Patch[] neighbours) {
-		if (this.herbivore == null) {
+		if (this.herbivore == null || this.herbivore.getMoved()) {
 			return;
 		}
 
@@ -133,11 +133,20 @@ public class Patch {
 			seedingPlace.setHerbivore(new Herbivore(this.herbivore.getAge(), this.herbivore.getHunger()));
 			if (seedingPlace.getDaisy() != null) {
 				seedingPlace.getHerbivore().eatDaisy();
+				seedingPlace.getHerbivore().setMoved(true);
 				seedingPlace.setDaisy(null);
 			}
 			this.herbivore = null;
 		}
 	}
+
+	public void resetMoved() {
+		if (this.herbivore == null ) {
+			return;
+		}
+		this.herbivore.setMoved(false);
+	}
+
 
 	public Daisy getDaisy() {
 		return this.daisy;
