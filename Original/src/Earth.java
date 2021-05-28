@@ -1,6 +1,3 @@
-/**
- * This class represents the earth as a grid (2D array) of patches.
- */
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -9,6 +6,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Random;
 
+/**
+ * This class represents the earth as a grid (2D array) of patches.
+ */
 public class Earth {
 
 	private final Patch[][] earth = new Patch[Params.surface_x][Params.surface_y];
@@ -49,7 +49,7 @@ public class Earth {
 	 * randomly across the patches.
 	 * The temperature of every patch is then updated along
 	 * with the global temperature.
-	 * @param albedoSurface
+	 * @param albedoSurface albedo of a daisy-less patch
 	 */
 	public void init(double albedoSurface) {
 
@@ -79,7 +79,7 @@ public class Earth {
 		setupCSV();
 		System.out.println("Initial Sate:");
 		System.out.println("-----------------------");
-		System.out.println(toString());
+		System.out.println(this);
 	}
 
 	/**
@@ -151,9 +151,9 @@ public class Earth {
 	/**
 	 * This method returns all the neighbours for a given patch.
 	 * The patch is specified using the x and y coordinates.
-	 * @param x
-	 * @param y
-	 * @return
+	 * @param x x-coordinate
+	 * @param y y-coordinate
+	 * @return list of neighbours
 	 */
 	private Patch[] findNeighbours(int x, int y) {
 		Patch[] neighbours = new Patch [8];
@@ -205,8 +205,8 @@ public class Earth {
 
 	/**
 	 * Places a white daisy at the specified coordinates.
-	 * @param x
-	 * @param y
+	 * @param x x coordinate
+	 * @param y y coordinate
 	 */
 	private void placeWhite(int x, int y) {
 		WhiteDaisy daisy = new WhiteDaisy(albedoWhite, random.nextInt(MAX_AGE));
@@ -215,8 +215,8 @@ public class Earth {
 
 	/**
 	 * Places a black daisy at the specified coordinates.
-	 * @param x
-	 * @param y
+	 * @param x x coordinate
+	 * @param y y coordinate
 	 */
 	private void placeBlack(int x, int y) {
 		BlackDaisy daisy = new BlackDaisy(albedoBlack, random.nextInt(MAX_AGE));

@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.Random;
+
 /**
  * The Patch class represents a patch on earth.
  * This patch can be empty, or it can have either
@@ -6,10 +9,6 @@
  * The temporary temparture is used when diffusing
  * heat among patches.
  */
-import java.util.ArrayList;
-import java.util.Random;
-import java.util.stream.IntStream;
-
 public class Patch {
 
 	private Herbivore herbivore;
@@ -54,7 +53,7 @@ public class Patch {
 	 * If a daisy reaches its maximum age, then the daisy dies.
 	 * Moreover, every daisy has a chance of producing a seed (another daisy)
 	 * in one of its empty neighbouring patches.
-	 * @param neighbours
+	 * @param neighbours list of neighbours to patch
 	 */
 	public void checkSurvivability(Patch[] neighbours) {
 		if (this.daisy == null) {
@@ -80,7 +79,7 @@ public class Patch {
 	/**
 	 * This method first gets a list of all empty neighbouring patches.
 	 * It then chooses a random patch of these empty patches to plant the seed.
-	 * @param neighbours
+	 * @param neighbours list of neighbours to patch
 	 */
 	private void findDaisylessNeighbour(Patch[] neighbours) {
 		ArrayList<Patch> daisylessNeighbours = new ArrayList<>();
@@ -110,7 +109,7 @@ public class Patch {
 	 * then the herbivore dies.
 	 * Moreover, every herbivore has a chance of reproducing.
 	 * The herbivore moves to a neighbouring patch.
-	 * @param neighbours
+	 * @param neighbours list of neighbours to patch
 	 */
 	public void updateHerbivore(Patch[] neighbours) {
 		if (this.herbivore == null || this.herbivore.getMoved()) {
@@ -132,8 +131,8 @@ public class Patch {
 
 	/**
 	 * Variable moving symbolises whether the herbivore is moving or not (i.e. reproducing).
-	 * @param neighbours
-	 * @param moving
+	 * @param neighbours list of neighbours to patch
+	 * @param moving whether the herbivore has already moved this tick or not
 	 */
 	private void findHerbivorelessNeighbours(Patch[] neighbours, boolean moving) {
 		ArrayList<Patch> herbivorelessNeighbours = new ArrayList<>();

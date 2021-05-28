@@ -6,6 +6,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Random;
 
+/**
+ * This class represents the earth as a grid (2D array) of patches.
+ */
 public class Earth {
 
 	private final Patch[][] earth = new Patch[Params.surface_x][Params.surface_y];
@@ -40,6 +43,16 @@ public class Earth {
 		this.init(albedoSurface);
 	}
 
+	/**
+	 * This method initalizes earth in regards to the value
+	 * of the albedo surface of the patches and the solar
+	 * luminosity.
+	 * Moreover, the white and black daises and the herbivores
+	 * are distributed randomly across the patches.
+	 * The temperature of every patch is then updated along
+	 * with the global temperature.
+	 * @param albedoSurface describes the albedo of a non-daisy holding patch.
+	 */
 	public void init(double albedoSurface) {
 
 		for(int i=0; i < Params.surface_x; i++) {
@@ -68,7 +81,10 @@ public class Earth {
 		System.out.println(this);
 	}
 
-
+	/**
+	 * This method runs DaisyWorld.
+	 * performing the necessary checks and updates until the max number of ticks has been reached.
+	 */
 	public void run() {
 		while(ticks < maxTicks) {
 			countOrganisms();
@@ -90,13 +106,15 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * This method updates the herbivores.
+	 */
 	private void updateHerbivores() {
 		for(int i=0;i < Params.surface_x; i++) {
 			for(int j=0;j < Params.surface_y; j++) {
 				earth[i][j].updateHerbivore(findNeighbours(i, j));
 			}
 		}
-
 		for(int i=0;i < Params.surface_x; i++) {
 			for (int j = 0; j < Params.surface_y; j++) {
 				earth[i][j].resetMoved();
@@ -104,6 +122,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * This checks the surviability for daisies.
+	 */
 	private void checkSurvivability() {
 		for (int i=0; i < Params.surface_x; i++) {
 			for (int j = 0; j < Params.surface_y; j++) {
@@ -112,6 +133,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * This method distributes the heat from patches to their neighbours.
+	 */
 	private void diffuse() {
 
 		for (int i=0; i < Params.surface_x; i++) {
@@ -140,6 +164,13 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * This method returns all the neighbours for a given patch.
+	 * The patch is specified using the x and y coordinates.
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @return list of neighbours
+	 */
 	private Patch[] findNeighbours(int x, int y) {
 		Patch[] neighbours = new Patch [8];
 
@@ -197,21 +228,39 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * Places a white daisy at the specified coordinates.
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 */
 	private void placeWhite(int x, int y) {
 		WhiteDaisy daisy = new WhiteDaisy(albedoWhite, random.nextInt(MAX_AGE));
 		earth[x][y].setDaisy(daisy);
 	}
 
+	/**
+	 * Places a black daisy at the specified coordinates.
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 */
 	private void placeBlack(int x, int y) {
 		BlackDaisy daisy = new BlackDaisy(albedoBlack, random.nextInt(MAX_AGE));
 		earth[x][y].setDaisy(daisy);
 	}
 
+	/**
+	 * Places a herbivore at the specified coordinates.
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 */
 	private void placeHerbivore(int x, int y) {
 		Herbivore herbivore = new Herbivore(0, random.nextInt(Params.HERBIVORE_STARVE_TIME));
 		earth[x][y].setHerbivore(herbivore);
 	}
 
+	/**
+	 * Updates patch temperature for every patch.
+	 */
 	private void updatePatchTemp() {
 		for(int i=0;i < Params.surface_x; i++) {
 			for(int j=0; j < Params.surface_y; j++) {
@@ -220,6 +269,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * Calculates the global temperature
+	 */
 	private void calcGlobalTemp() {
 		double total = 0;
 		for(int i=0;i < Params.surface_x; i++) {
@@ -230,6 +282,11 @@ public class Earth {
 		this.globalTemp = total / (Params.surface_x * Params.surface_y);
 	}
 
+	/**
+	 * Counts the number of ogransims.
+	 * In our case, it counts the number of herbivores
+	 * and the number of white and black daises.
+	 */
 	private void countOrganisms() {
 		int white = 0, black = 0, herbivores = 0;
 
@@ -252,6 +309,9 @@ public class Earth {
 		this.numHerbivores = herbivores;
 	}
 
+	/**
+	 * Creates a csv file called output.csv.
+	 */
 	private void setupCSV() {
 		outputCSV = new File("output.csv");
 
@@ -266,6 +326,9 @@ public class Earth {
 		}
 	}
 
+	/**
+	 * Writes DaisyWorld data to the output.csv file.
+	 */
 	private void writeCSV() {
 		try {
 			outputBW = new BufferedWriter(new FileWriter(outputCSV, true));
